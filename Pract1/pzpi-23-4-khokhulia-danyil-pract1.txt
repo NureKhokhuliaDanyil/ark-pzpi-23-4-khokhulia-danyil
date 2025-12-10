@@ -1,0 +1,355 @@
+МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ 
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ
+УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+ 
+Кафедра «Програмна інженерія»
+ 
+ 
+ЗВІТ
+до практичного заняття №1 з дисципліни
+«Аналіз та рефакторинг коду»
+На тему: «Правила оформлення програмного коду C# за принципами SOLID»
+
+ 
+ 
+Виконав:                                                   Прийняв:
+ст. гр. ПЗПІ-23-4                                    	   ст. викладач кафедри ПІ 
+Хохуля Даниіл Андрійович                                   Сокорчук Ігор Петрович
+						
+
+
+Харків 2025
+
+
+1 МЕТА
+     Ознайомити студентів з основними рекомендаціями щодо написання чистого, ефективного та підтримуваного коду для різних мов програмування, а також навчити аналізувати та рефакторити код для покращення його якості.
+
+2 ЗАВДАННЯ
+	Студент повинен обрати мову програмування, дослідити основні рекомендації для написання якісного коду у цій мові, продемонструвати ці рекомендації на прикладах коду, обґрунтувати кожну рекомендацію і надати детальні пояснення. Для кожного прикладу мають бути наведені фрагменти коду.
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+1. Базові інженерні принципи (KISS, DRY, YAGNI)
+     Принцип KISS (Keep It Simple, Stupid) стверджує, що більшість систем працюють найкраще, якщо вони залишаються простими, а не ускладненими. Уникнення непотрібної складності має бути ключовою метою проектування, а код повинен бути зрозумілим будь-якому розробнику, який бачить його вперше. Складні однорядкові конструкції або надмірна абстракція часто призводять до помилок, яких можна уникнути, написавши простіший код.      
+     Принцип DRY (Don't Repeat Yourself) спрямований на усунення дублювання інформації та логіки. Кожна частина знань повинна мати єдине, однозначне представлення в системі. Якщо блок коду копіюється вдруге, це є сигналом для винесення його в окремий метод або клас. Це значно спрощує підтримку програмного забезпечення, оскільки при необхідності зміни алгоритму правки вносяться лише в одному місці, а не по всьому проєкту.      
+     Принцип YAGNI (You Aren't Gonna Need It) застерігає від створення надлишкового функціоналу "на майбутнє". Реалізовувати слід лише ті функції, які необхідні згідно з поточними вимогами. Написання коду про запас збільшує складність системи, вимагає додаткового часу на тестування та підтримку, і часто призводить до появи "мертвого" коду, який ніколи не використовується.
+2. Принципи SOLID
+     Принцип єдиної відповідальності (Single Responsibility Principle) визначає, що клас повинен мати лише одну причину для зміни. Це означає, що клас має виконувати одне чітко окреслене завдання. Поєднання в одному класі бізнес-логіки, роботи з базою даних та інтерфейсу користувача робить код крихким і важким для тестування. Розділення обов'язків дозволяє змінювати одну частину системи, не ламаючи інші.      
+     Принцип відкритості/закритості (Open/Closed Principle) наголошує на тому, що програмні сутності мають бути відкриті для розширення, але закриті для модифікації. Новий функціонал слід додавати шляхом створення нових класів, наприклад, через наслідування або реалізацію інтерфейсів, а не змінюючи вже існуючий і протестований код. Це мінімізує ризик внесення помилок у стабільні модулі програми.      
+     Принцип підстановки Лісков (Liskov Substitution Principle) вимагає, щоб об'єкти дочірніх класів могли замінювати об'єкти батьківського класу без порушення коректності роботи програми. Якщо клас-нащадок змінює поведінку так, що код, який використовує базовий клас, перестає працювати (наприклад, метод викидає несподівану помилку), це свідчить про помилку в архітектурі наслідування.      
+     Принцип розділення інтерфейсу (Interface Segregation Principle) стверджує, що клієнти не повинні залежати від методів, які вони не використовують. Замість створення одного великого інтерфейсу загального призначення, краще створити кілька вузькоспеціалізованих інтерфейсів. Це дозволяє класам реалізовувати лише ті методи, які їм дійсно потрібні для функціонування, уникаючи пустих реалізацій.     
+     Принцип інверсії залежностей (Dependency Inversion Principle) формулює правило, згідно з яким модулі вищого рівня не повинні залежати від модулів нижчого рівня. Обидва повинні залежати від абстракцій. Використання інтерфейсів для зв'язку між компонентами та впровадження залежностей (Dependency Injection) дозволяє легко замінювати реалізації (наприклад, базу даних або сервіс логування) без переписування основної бізнес-логіки.
+         
+4 ВИСНОВКИ
+     У ході виконання роботи було проаналізовано фундаментальні архітектурні принципи проектування програмного забезпечення. Встановлено, що дотримання інженерних практик KISS, DRY, YAGNI дозволяє уникнути зайвої складності та дублювання коду. Застосування принципів SOLID забезпечує створення гнучкої, масштабованої та підтримуваної архітектури, що є обов'язковим стандартом для професійної розробки на мові C#. Також було розроблено презентацію за цією темою.
+     
+5 ВИКОРИСТАНІ ДЖЕРЕЛА
+1) Clean Code: A Handbook of Agile Software Craftsmanship. O’Reilly Online Learning. URL: https://www.oreilly.com/library/view/clean-code/9780136083238/ (дата звернення: 29.11.2025).
+2) SOLID Principles. Refactoring and Design Patterns. URL: https://refactoring.guru/design-patterns/solid-principles (дата звернення: 30.11.2025).
+3) Modern Web App Design Principles. Microsoft Learn: Build skills that open doors in your career. URL: https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/architectural-principles (дата звернення: 28.11.2025).
+
+ДОДАТОК А
+Відеозапис презентації результатів практичної роботи:
+https://youtu.be/0PEncEJxdis
+
+Хронологічний опис відеозапису:
+00:00 - Вступ 
+00:14 - Особливості мови С# 
+1:48 - Принцип KISS 
+3:11 - Принцип DRY 
+4:22 - Принцип YAGNI 
+5:11 - Принципи SOLID 
+5:32 - Принцип Single Responsibility 
+6:36 - Принцип Open/Closed 
+7:43 - Принцип Liskov Substitution 
+8:44 - Принцип Interface Segregation 
+9:43 - Принцип Dependency Inversion 
+10:46 - Висновки 
+11:21 - Список джерел
+
+ДОДАТОК Б
+Програмний код, використаний як приклад у презентації.
+DryPrinciple.cs
+namespace Pract1;
+// --- ПОГАНИЙ ПРИКЛАД ---
+// Логіка розрахунку податку дублюється.
+public class BadSalaryPrinter
+{
+    public void PrintManagerSalary(decimal baseSalary)
+    {
+        decimal tax = baseSalary * 0.18m;
+        decimal netSalary = baseSalary - tax;
+        Console.WriteLine($"Зарплата менеджера: {netSalary} грн");
+    }
+    public void PrintDeveloperSalary(decimal baseSalary)
+    {
+        decimal tax = baseSalary * 0.18m;
+        decimal netSalary = baseSalary - tax;
+        Console.WriteLine($"Зарплата розробника: {netSalary} грн");
+    }
+}
+// --- ГАРНИЙ ПРИКЛАД ---
+// Логіка розрахунку централізована в одному методі.
+public class GoodSalaryPrinter
+{
+    public void PrintManagerSalary(decimal baseSalary)
+    {
+        decimal netSalary = CalculateNetSalary(baseSalary);
+        Console.WriteLine($"Зарплата менеджера: {netSalary} грн");
+    }
+    public void PrintDeveloperSalary(decimal baseSalary)
+    {
+        decimal netSalary = CalculateNetSalary(baseSalary);
+        Console.WriteLine($"Зарплата розробника: {netSalary} грн");
+    }
+    private decimal CalculateNetSalary(decimal baseSalary)
+    {
+        const decimal TaxRate = 0.18m;
+        return baseSalary - (baseSalary * TaxRate);
+    }
+}
+KissPrinciple.cs
+using System.Globalization;
+namespace Pract1;
+// --- ПОГАНИЙ ПРИКЛАД ---
+// Занадто складний однорядковий код, який важко читати та налагоджувати.
+public class BadKissDayProvider
+{
+    public string GetDayName(int day)
+    {
+        return day < 1 || day > 7
+            ? throw new ArgumentException()
+            : CultureInfo.CurrentCulture.DateTimeFormat.DayNames[day == 7 ? 0 : day];
+    }
+}
+// --- ГАРНИЙ ПРИКЛАД ---
+// Проста, читабельна логіка з використанням стандартного Enum.
+public class GoodKissDayProvider
+{
+    public string GetDayName(int day)
+    {
+        if (day < 1 || day > 7)
+        {
+            throw new ArgumentOutOfRangeException(nameof(day), "Day must be between 1 and 7");
+        }
+        return ((DayOfWeek)(day % 7)).ToString();
+    }
+}
+YagniPrinciple.cs
+namespace Pract1;
+// --- ПОГАНИЙ ПРИКЛАД ---
+// Містить методи "на майбутнє", які зараз не потрібні.
+public class BadReportExporter
+{
+    public void ExportToCsv(string data)
+    {
+        File.WriteAllText("report.csv", data);
+    }
+    public void ExportToPdf(string data)
+    {
+        throw new NotImplementedException("Буде реалізовано пізніше");
+    }
+    public void ExportToXml(string data)
+    {
+        throw new NotImplementedException("Буде реалізовано пізніше");
+    }
+}
+// --- ГАРНИЙ ПРИКЛАД ---
+// Реалізовано лише те, що вимагається зараз.
+public class GoodReportExporter
+{
+    public void ExportToCsv(string data)
+    {
+        File.WriteAllText("report.csv", data);
+    }
+}
+DipPrinciple.cs
+namespace Pract1.Solid_examples;
+// --- ПОГАНИЙ ПРИКЛАД ---
+// Модуль високого рівня залежить напряму від модуля низького рівня.
+public class EmailNotifier
+{
+    public void Alert(string weather) => Console.WriteLine($"Email: {weather}");
+}
+public class BadWeatherTracker
+{
+    private EmailNotifier _notifier = new EmailNotifier();
+
+    public void Update(string weather)
+    {
+        if (weather == "Rainy") _notifier.Alert(weather);
+    }
+}
+// --- ГАРНИЙ ПРИКЛАД ---
+// Обидва залежать від абстракції.
+public interface INotifier
+{
+    void Alert(string message);
+}
+public class GoodEmailNotifier : INotifier
+{
+    public void Alert(string message) => Console.WriteLine($"Email: {message}");
+}
+public class GoodSmsNotifier : INotifier
+{
+    public void Alert(string message) => Console.WriteLine($"SMS: {message}");
+}
+public class GoodWeatherTracker
+{
+    private readonly INotifier _notifier;
+    public GoodWeatherTracker(INotifier notifier)
+    {
+        _notifier = notifier;
+    }
+
+    public void Update(string weather)
+    {
+        _notifier.Alert(weather);
+    }
+}
+IspPrinciple.cs
+namespace Pract1.Solid_examples;
+// --- ПОГАНИЙ ПРИКЛАД ---
+// Клієнти змушені реалізовувати методи, які вони не використовують.
+public interface IMultifunctionDevice
+{
+    void Print();
+    void Scan();
+}
+public class BadPrinter : IMultifunctionDevice
+{
+    public void Print() { /* Друк... */ }
+    public void Scan() { throw new NotImplementedException(); }
+}
+// --- ГАРНИЙ ПРИКЛАД ---
+// Інтерфейси розділені.
+public interface IPrinter { void Print(); }
+public interface IScanner { void Scan(); }
+public class GoodPrinter : IPrinter
+{
+    public void Print() { /* Друк... */ }
+}
+public class XeroxMachine : IPrinter, IScanner
+{
+    public void Print() { /* Друк... */ }
+    public void Scan() { /* Сканування... */ }
+}
+LspPrinciple.cs
+namespace Pract1.Solid_examples;
+// --- ПОГАНИЙ ПРИКЛАД ---
+// Порушення LSP: Страус є птахом, але не може літати.
+// Код, який очікує BadBird, зламається, якщо отримає BadOstrich.
+public class BadBird
+{
+    public virtual void Fly()
+    {
+        Console.WriteLine("Птах летить...");
+    }
+}
+public class BadOstrich : BadBird
+{
+    public override void Fly()
+    {
+        throw new NotImplementedException("Страуси не вміють літати!");
+    }
+}
+// --- ГАРНИЙ ПРИКЛАД ---
+// Виправляємо ієрархію. Базовий клас Bird не гарантує політ.
+// Створюємо окремий клас для птахів, що літають.
+public class GoodBird
+{
+    public string Name { get; set; }
+}
+public class GoodFlyingBird : GoodBird
+{
+    public void Fly()
+    {
+        Console.WriteLine("Птах летить високо в небі!");
+    }
+}
+public class GoodOstrich : GoodBird
+{
+    // У страуса просто немає методу Fly, тому помилка неможлива.
+    public void Run()
+    {
+        Console.WriteLine("Страус біжить швидко!");
+    }
+}
+OcpPrinciple.cs
+namespace Pract1.Solid_examples;
+// --- ПОГАНИЙ ПРИКЛАД ---
+// Вимагає модифікації класу для додавання нових фігур.
+public class Rectangle { public double Width; public double Height; }
+public class Circle { public double Radius; }
+public class BadAreaCalculator
+{
+    public double Area(object shape)
+    {
+        if (shape is Rectangle r) return r.Width * r.Height;
+        if (shape is Circle c) return Math.PI * c.Radius * c.Radius;
+        return 0;
+    }
+}
+// --- ГАРНИЙ ПРИКЛАД ---
+// Нові фігури можна додавати через створення нових класів (розширення), не змінюючи існуючий код.
+public abstract class Shape
+{
+    public abstract double CalculateArea();
+}
+public class GoodRectangle : Shape
+{
+    public double Width { get; set; }
+    public double Height { get; set; }
+    public override double CalculateArea() => Width * Height;
+}
+public class GoodCircle : Shape
+{
+    public double Radius { get; set; }
+    public override double CalculateArea() => Math.PI * Radius * Radius;
+}
+SrpPrinciple.cs
+namespace Pract1.Solid_examples;
+public class Product
+{
+    public string Name { get; set; }
+}
+// --- ПОГАНИЙ ПРИКЛАД ---
+// Клас обробляє бізнес-логіку, збереження даних та сповіщення.
+public class BadOrder
+{
+    public void CreateOrder(Product product)
+    {
+        Console.WriteLine($"Замовлення для {product.Name} створено.");
+        File.AppendAllText("db.txt", product.Name);
+        Console.WriteLine($"Лист відправлено: Куплено {product.Name}");
+    }
+}
+// --- ГАРНИЙ ПРИКЛАД ---
+// Відповідальності розділені між різними класами.
+public class OrderRepository
+{
+    public void Save(Product product) => File.AppendAllText("db.txt", product.Name);
+}
+public class EmailService
+{
+    public void SendConfirmation(Product product) => Console.WriteLine($"Лист відправлено: Куплено {product.Name}");
+}
+public class GoodOrderService
+{
+    private readonly OrderRepository _repository;
+    private readonly EmailService _emailService;
+    public GoodOrderService()
+    {
+        _repository = new OrderRepository();
+        _emailService = new EmailService();
+    }
+    public void CreateOrder(Product product)
+    {
+        Console.WriteLine($"Замовлення для {product.Name} створено.");
+        _repository.Save(product);
+        _emailService.SendConfirmation(product);
+    }
+}
+
+ДОДАТОК В
+Презентація на тему «Правила оформлення програмного коду».
