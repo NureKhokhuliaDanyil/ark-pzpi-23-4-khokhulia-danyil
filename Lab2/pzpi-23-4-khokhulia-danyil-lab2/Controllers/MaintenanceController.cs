@@ -1,0 +1,78 @@
+using Microsoft.AspNetCore.Mvc;
+using Washing.DTOs;
+using Washing.Entities;
+using Washing.Interfaces;
+
+namespace Washing.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class MaintenanceController : ControllerBase
+{
+    private readonly IGenericRepository<MaintenanceLog> _repository;
+
+    public MaintenanceController(IGenericRepository<MaintenanceLog> repository)
+    {
+        _repository = repository;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<MaintenanceLogResponseDto>>> GetAll()
+    {
+        var logs = await _repository.GetAllAsync();
+        var response = logs.Select(l => new MaintenanceLogResponseDto(l.Id, l.MachineId, l.Description, l.StartedAt));
+        return Ok(response);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<MaintenanceLogResponseDto>> GetById(int id)
+    {
+        var log = await _repository.GetByIdAsync(id);
+        if (log == null)
+            return NotFound();
+
+        var response = new MaintenanceLogResponseDto(log.Id, log.MachineId, log.Description, log.StartedAt);
+        return Ok(response);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<MaintenanceLogResponseDto>> Create(CreateMaintenanceLogDto dto)
+    {
+        var log = new MaintenanceLog
+        {
+            MachineId = dto.MachineId,
+            Description = dto.Description,
+            StartedAt = dto.StartedAt
+        };
+
+        var created = await _repository.AddAsync(log);
+        var response = new MaintenanceLogResponseDto(created.Id, created.MachineId, created.Description, created.StartedAt);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, response);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, UpdateMaintenanceLogDto dto)
+    {
+        var log = await _repository.GetByIdAsync(id);
+        if (log == null)
+            return NotFound();
+
+        log.MachineId = dto.MachineId;
+        log.Description = dto.Description;
+        log.StartedAt = dto.StartedAt;
+
+        await _repository.UpdateAsync(log);
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var log = await _repository.GetByIdAsync(id);
+        if (log == null)
+            return NotFound();
+
+        await _repository.DeleteAsync(id);
+        return NoContent();
+    }
+}
