@@ -1,0 +1,240 @@
+﻿МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ 
+  
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ 
+УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ 
+  
+Кафедра «Програмна інженерія» 
+  
+ЗВІТ 
+з лабораторної роботи № 3 з дисципліни «Аналіз та рефакторинг коду» з теми «Розробка бізнес логіки та функцій адміністрування серверної частини системи» 
+   
+Виконав 					Прийняв:                                                                     ст. гр. ПЗПІ-23-4           старший викладач ПІ                              	       Хохуля Д. А.                Сокорчук І.П.                                     
+Харків  2025 
+ 
+1 ІСТОРІЯ ЗМІН 
+№		Дата		Версія звіту		Опис змін та виправлень  1 		04.12.25		0.1				Створено розділи «Історія змін», «Завдання», Опис виконаної роботи», «Висновки», «Додаток А», «Додаток Б» 2 ЗАВДАННЯ 
+1) Розробити бізнес логіку серверної частини програмної системи. 
+2) Розробити функції адміністрування серверної частини програмної системи.
+3) Розробити функції, які забезпечуватимуть адміністрування системи, наприклад, управління користувачами, налаштування системних параметрів, моніторинг активності, доступ до логів та управління ролями. 
+4) Створити програмну реалізацію бізнес логіки та функцій адміністрування серверної частини. 
+5) Реалізувати програмний код для бізнес логіки на серверній частині, включаючи обробку запитів до бази даних та взаємодію з клієнтами. 
+6) Реалізувати програмний код для функцій адміністрування, зокрема функції управління користувачами, моніторингу, та зміни системних параметрів. 
+7) Перевірити роботу серверної частини системи.
+8) Завантажити або оновити створений програмний код у GitHub репозиторій.
+3 ОПИС ВИКОНАНОЇ РОБОТИ 
+     У ході виконання лабораторної роботи серверну частину системи «WashConnect» було спроєктовано та реалізовано з використанням багатошарової архітектури (Layered Architecture), ключовим елементом якої став шар сервісів (Service Layer), що дозволило відокремити складну бізнес-логіку від контролерів АРІ та забезпечити гнучкість і тестованість коду. Основою реалізації стали три ключові підсистеми: модуль динамічного ціноутворення, транзакційна система бронювання та модуль аналітики для адміністрування, реалізація яких детально розглянута нижче.
+     Першим та одним із найбільш значущих інженерних рішень стала розробка алгоритму динамічного ціноутворення, який реалізовано у класі PricingService. Логіка роботи цього сервісу полягає у формуванні кінцевої вартості послуги на основі базового тарифу з урахуванням низки змінних факторів: поточного часу доби, загального навантаження на пральню та історії активності користувача. Процес розпочинається з отримання базової ціни обраного режиму прання, після чого система перевіряє активні часові умови (TimePricingCondition), застосовуючи відповідні множники (наприклад, знижки у нічний час), далі аналізується співвідношення зайнятих машин до загальної кількості (LoadPricingCondition) для визначення пікового навантаження, і на завершальному етапі перевіряється кількість завершених сесій користувача для надання автоматичної знижки лояльності у розмірі 5% за активне користування сервісом. На рисунку 3.1 можна побачити послідовність дій цього алгоритму, включаючи всі точки прийняття рішень та розгалуження логіку, а програмна реалізація відповідного методу CalculateFinalPriceAsync наведена у додатку Б.
+     
+     Рисунок 3.1 UML-діаграма діяльності: Динамічне ціноутворення
+
+     Другим критично важливим компонентом системи стала реалізація транзакційної моделі створення сесії прання, за яку відповідає SessionService. Враховуючи фінансовий характер операцій, було застосовано механізм транзакцій бази даних (IDbContextTransaction), що гарантує атомарність змін — тобто гроші з балансу користувача списуються лише за умови успішного бронювання машини та створення запису про сесію. Процес взаємодії компонентів під час цього виклику починається з валідації стану машини та перевірки платоспроможності клієнта, після чого у межах єдиної транзакції відбувається дебетування балансу, створення запису в таблиці Transactions, переведення статусу машини у Busy та, власне, створення активної сесії WashingSession. Обмін повідомленнями між клієнтом, контролером, сервісом та базою даних під час виконання цієї операції детально проілюстровано на Рисунку 3.2, що демонструє послідовність викликів та обробку виняткових ситуацій, таких як брак коштів. З кодом можна ознайомитися в додатку Б.
+
+     Рисунок 3.2 UML-діаграма взаємодії: Процес створення сесії
+     
+     Третім напрямком розробки стало створення функцій адміністрування та аналітики, інкапсульованих у AdminService. Для надання власнику бізнесу інструментів прийняття рішень було розроблено метод агрегації статистичних даних GetBusyHoursAnalyticsAsync, який використовує можливості LINQ для групування завершених сесій за годинами доби. Це дозволяє отримати деталізований звіт про розподіл навантаження та доходів протягом дня, визначаючи пікові години (High Load) та періоди простою, що є основою для подальшого налаштування тарифної політики. Логіка перетворення сирих даних з бази у структурований аналітичний звіт візуалізована на Рисунку 3.3, а приклад коду можна побачити у додатку Б.
+     
+     Рисунок 3.3 UML-діаграма діяльності: Формування аналітики
+     
+	 Таким чином, комплексне використання патернів проєктування, транзакційних механізмів СУБД та просунутих можливостей ORM Entity Framework дозволило створити надійну та функціональну серверну частину, яка повністю відповідає вимогам до сучасної системи автоматизації бізнесу.
+     
+4 ВИСНОВКИ 
+     Під час виконання лабораторної роботи було проведено комплексне проектування та програмну реалізацію серверної частини системи автоматизації пралень «WashConnect». Основною метою стало створення надійної багаторівневої архітектури з використанням патерну Service Layer, що забезпечило чітке розмежування відповідальності між компонентами. Ключовим досягненням є розробка складної бізнес-логіки: реалізовано алгоритми динамічного ціноутворення (PricingService), які автоматично коригують вартість послуг залежно від часу та навантаження, а також впроваджено транзакційну модель бронювання, що гарантує атомарність фінансових операцій та запобігає колізіям при доступі до обладнання.
+     Окрему увагу було приділено функціям адміністрування та візуальному моделюванню. Розроблено аналітичний модуль (AdminService), який за допомогою LINQ-запитів розраховує глобальні KPI та генерує звіти про ефективність роботи локацій, а механізми рольового доступу (RBAC) забезпечили безпеку системи. Для документування архітектури побудовано UML-діаграми діяльності та взаємодії, які деталізують алгоритми розрахунку ціни та життєвий цикл транзакцій. Отримана програмна реалізація є масштабованою, надійною та повністю готовою до інтеграції з клієнтськими інтерфейсами та IoT-модулями.
+   
+5 ВИКОРИСТАНІ ДЖЕРЕЛА 
+1) Методичні вказівки до лабораторних робіт з дисципліни «Аналіз та рефакторинг коду програмного забезпечення» (дата звернення: 
+05.12.2025). 
+2) ASP.NET documentation. Microsoft Learn: Build skills that open doors in your career. URL: https://docs.microsoft.com/en-us/aspnet/core/ (дата звернення: 05.12.2025). 
+3) Dependency injection in ASP.NET Core. Microsoft Learn: Build skills that open doors in your career. URL: https://learn.microsoft.com/uk-ua/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-10.0 (дата звернення: 06.12.2025). 
+4) What is Activity Diagram? Visual Paradigm. URL: https://www.visual-paradigm.com/guide/uml-unified-modeling-language/what-is-activity-diagram/ (дата звернення: 06.12.2025).
+
+ДОДАТОК А 
+Відеозапис презентації результатів лабораторної роботи: 
+https://youtu.be/tvPG6229o4k
+Хронологічний опис відеозапису:
+00:00 – Вступ
+00:11 – Авторизація та розподілення ролей 
+2:14 – Створення тестових даних 
+4:00 – Демонстрація перегляду ціни бронування пральної машини 
+4:25 - Динамічне ціноутворення 
+5:02 - Бронювання пральної машини 
+6:25 - Кешбек механізм 
+7:10 - Аналітичні інструменти адміністратора 
+8:41 - CSV звіт про роботу пральних
+ 
+
+ДОДАТОК Б
+З повним кодом проекту можна ознайомитися на платформі зберігання версій Git, за наведеним нижче посиланням:
+https://github.com/NureKhokhuliaDanyil/Washing
+Б.1 Алгоритму розрахунку ціни:
+  1 public async Task<PricingDetailDto> CalculateFinalPriceAsync(int laundryId, int modeId, int userId)
+  2  {
+  3      var mode = await _context.WashModes.FindAsync(modeId);
+  4      if (mode == null)
+  5          throw new InvalidOperationException("Wash mode not found");
+  6
+  7      var basePrice = mode.Price;
+  8      var modifiers = new List<string>();
+  9      var finalPrice = basePrice;
+ 10
+ 11      var timeMultiplier = await GetTimeMultiplierAsync();
+ 12      if (timeMultiplier != 1.0m)
+ 13      {
+ 14          finalPrice *= timeMultiplier;
+ 15          modifiers.Add($"Time discount: {(timeMultiplier < 1 ? (1 - timeMultiplier) * 100 : (timeMultiplier - 1) * 100):F0}%");
+ 16      }
+ 17
+ 18      var loadMultiplier = await GetLoadMultiplierAsync(laundryId);
+ 19      if (loadMultiplier != 1.0m)
+ 20      {
+ 21          finalPrice *= loadMultiplier;
+ 22          modifiers.Add($"Peak load surcharge: {(loadMultiplier - 1) * 100:F0}%");
+ 23      }
+ 24
+ 25      var completedSessions = await _context.WashingSessions
+ 26          .CountAsync(s => s.UserId == userId && s.Status == "Completed");
+ 27
+ 28      if (completedSessions > 10)
+ 29      {
+ 30          finalPrice *= 0.95m;
+ 31          modifiers.Add("Loyalty discount: 5%");
+ 32      }
+ 33
+ 34      if (modifiers.Count == 0)
+ 35      {
+ 36          modifiers.Add("Standard pricing");
+ 37      }
+ 38
+ 39      return new PricingDetailDto(basePrice, Math.Round(finalPrice, 2), modifiers);
+ 40  }
+
+Б.2 Реалізація транзакційного створення сесії:
+
+    1  public async Task<SessionResponseDto> StartSessionAsync(StartSessionDto dto)
+  2  {
+  3      using var transaction = await _context.Database.BeginTransactionAsync();
+  4
+  5      try
+  6      {
+  7          var machine = await _context.WashingMachines.FindAsync(dto.MachineId);
+  8          if (machine == null)
+  9              throw new InvalidOperationException("Machine not found");
+ 10
+ 11          if (!machine.IsAvailable())
+ 12              throw new InvalidOperationException("Machine is not available");
+ 13
+ 14          var user = await _context.Users.FindAsync(dto.UserId);
+ 15          if (user == null)
+ 16              throw new InvalidOperationException("User not found");
+ 17
+ 18          var mode = await _context.WashModes.FindAsync(dto.ModeId);
+ 19          if (mode == null)
+ 20              throw new InvalidOperationException("Wash mode not found");
+ 21
+ 22          var calculatedPrice = await _pricingService.CalculatePriceAsync(dto.MachineId, dto.ModeId);
+ 23
+ 24          if (!user.HasSufficientBalance(calculatedPrice))
+ 25              throw new InvalidOperationException("Insufficient balance");
+ 26
+ 27          user.Balance -= calculatedPrice;
+ 28
+ 29          var paymentTransaction = new Transaction
+ 30          {
+ 31              UserId = dto.UserId,
+ 32              Amount = calculatedPrice,
+ 33              Type = TransactionType.Payment,
+ 34              Timestamp = DateTime.Now
+ 35          };
+ 36          _context.Transactions.Add(paymentTransaction);
+ 37
+ 38          machine.Status = MachineStatus.Busy;
+ 39
+ 40          var session = new WashingSession
+ 41          {
+ 42              UserId = dto.UserId,
+ 43              MachineId = dto.MachineId,
+ 44              ModeId = dto.ModeId,
+ 45              StartTime = DateTime.Now,
+ 46              Status = "Active",
+ 47              ActualPrice = calculatedPrice,
+ 48              DoorLocked = true
+ 49          };
+ 50
+ 51          _context.WashingSessions.Add(session);
+ 52          await _context.SaveChangesAsync();
+ 53          await transaction.CommitAsync();
+ 54
+ 55          return new SessionResponseDto(session.Id, session.UserId, session.MachineId, session.ModeId, session.StartTime, session.EndTime, session.Status, session.ActualPrice, session.DoorLocked);
+ 56      }
+ 57      catch
+ 58      {
+ 59          await transaction.RollbackAsync();
+ 60          throw;
+ 61      }
+ 62  }
+
+Б.3 Логіка скасування сесії зі штрафами:
+1     public async Task CancelSessionAsync(int sessionId, int userId)
+  2     {
+  3         var session = await _context.WashingSessions
+  4             .Include(s => s.Machine)
+  5             .Include(s => s.User)
+  6             .FirstOrDefaultAsync(s => s.Id == sessionId);
+  7
+  8         if (session == null)
+  9             throw new InvalidOperationException("Session not found");
+ 10
+ 11         if (session.UserId != userId)
+ 12             throw new UnauthorizedAccessException("You can only cancel your own sessions");
+ 13
+ 14         if (session.Status == "Completed" || session.Status == "Cancelled")
+ 15             throw new InvalidOperationException("Session already completed or cancelled");
+ 16
+ 17         var hoursUntilStart = (session.StartTime - DateTime.Now).TotalHours;
+ 18         decimal refundAmount;
+ 19         string refundReason;
+ 20
+ 21         if (session.Status == "Active")
+ 22         {
+ 23             throw new Exceptions.BusinessRuleException("Cannot cancel an active session");
+ 24         }
+ 25         else if (hoursUntilStart > 1)
+ 26         {
+ 27             refundAmount = session.ActualPrice;
+ 28             refundReason = "Full refund (>1 hour notice)";
+ 29         }
+ 30         else if (hoursUntilStart > 0)
+ 31         {
+ 32             refundAmount = session.ActualPrice * 0.5m;
+ 33             refundReason = "50% refund (<1 hour notice)";
+ 34         }
+ 35         else
+ 36         {
+ 37             throw new Exceptions.BusinessRuleException("Too late to cancel");
+ 38         }
+ 39
+ 40         session.User.Balance += refundAmount;
+ 41
+ 42         var refundTransaction = new Transaction
+ 43         {
+ 44             UserId = userId,
+ 45             Amount = refundAmount,
+ 46             Type = TransactionType.Deposit,
+ 47             Timestamp = DateTime.Now
+ 48         };
+ 49         _context.Transactions.Add(refundTransaction);
+ 50
+ 51         session.Status = "Cancelled";
+ 52         session.EndTime = DateTime.Now;
+ 53         session.DoorLocked = false;
+ 54
+ 55         session.Machine.Status = MachineStatus.Idle;
+ 56
+ 57         await _notificationService.CreateNotificationAsync(
+ 58             userId,
+ 59             "Session Cancelled",
+ 60             $"{refundReason}: {refundAmount:C}"
+ 61         );
+ 62
+ 63         await _context.SaveChangesAsync();
+ 64     }
